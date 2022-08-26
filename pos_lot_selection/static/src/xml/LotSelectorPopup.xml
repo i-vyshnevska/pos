@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Copyright 2022 Camptocamp SA
+     License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl). -->
+<templates id="template" xml:space="preserve">
+
+        <t t-name="LotSelectorPopup" owl="1">
+            <div role="dialog" class="modal-dialog">
+                <div class="popup popup-text">
+                    <header class="title ">
+                        <t t-esc="props.title" />
+                    </header>
+                    <main class="body">
+                    <input
+                        type="text"
+                        class="popup-input list-line-input"
+                        id="new_select"
+                        list="prepared_lots"
+                        placeholder="Serial/Lot Number"
+                    />
+                        <datalist id="prepared_lots">
+                            <option
+                            t-foreach="lots"
+                            t-as="lot"
+                            t-key="lot_index"
+                            t-att-value="lot.name"
+                        >
+                                <t t-esc="lot.name" />
+                            </option>
+                        </datalist>
+                    </main>
+                    <footer class="footer">
+                        <div class="button confirm" t-on-click="confirm">
+                            Ok
+                        </div>
+                        <div class="button cancel" t-on-click="cancel">
+                            Cancel
+                        </div>
+                    </footer>
+                </div>
+            </div>
+        </t>
+
+</templates>

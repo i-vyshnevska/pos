@@ -1,56 +1,119 @@
-/* Copyright 2018 Tecnativa - David Vidal
-   License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl). */
-
-odoo.define("pos_lot_selection.models", function (require) {
+/*
+    Copyright 2022 Camptocamp SA
+    License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl)
+*/
+odoo.define("pos_lot_base.models", function (require) {
     "use strict";
 
-    var models = require("point_of_sale.models");
-    var session = require("web.session");
+    const models = require("point_of_sale.models");
 
+    models.load_models([
+        {
+            model: "stock.production.lot",
+            after: "product.product",
+            condition: function (self) {
+                return !self.config.limited_lots_loading;
+            },
+            domain: function (self) {
+                return [
+                    // "&",
+                    "&",
+                    ["product_id", "in", self.getLoadedProductIds()],
+                    // ["quant_ids.location_id", "=", self.config.warehouse_id[0]],
+                    "|",
+                    ["company_id", "=", self.config.company_id[0]],
+                    ["company_id", "=", false],
+                ];
+            },
+            fields: ["name", "product_id", "product_qty"],
+            loaded: function (self, lots) {
+                self.db.add_lots(
+                    lots.map((lot) => {
+                        lot.pos = self;
+                        return new models.StockProductionLot({}, lot);
+                    })
+                );
+            },
+        },
+    ]);
+
+    var posmodel_super = models.PosModel.prototype;
     models.PosModel = models.PosModel.extend({
-        get_lot: function (product, location_id) {
-            var done = new $.Deferred();
-            session.rpc("/web/dataset/search_read", {
-                "model": "stock.quant",
-                "domain": [
-                    ["location_id", "=", location_id],
-                    ["product_id", "=", product],
-                    ["lot_id", "!=", false]]
-            }, {'async': false}).then(function (result) {
-                var product_lot = {};
-                if (result.length) {
-                    for (var i = 0; i < result.length; i++) {
-                        if (product_lot[result.records[i].lot_id[1]]) {
-                            product_lot[result.records[i].lot_id[1]] += result.records[i].quantity;
-                        } else {
-                            product_lot[result.records[i].lot_id[1]] = result.records[i].quantity;
-                        }
-                    }
-                }
-                done.resolve(product_lot);
-            });
-            return done;
+        async after_load_server_data() {
+            var res = await posmodel_super.after_load_server_data.call(this);
+            // Postpone lot loading according to pos config
+            this.loadLotsBackground();
+            return res;
         },
-    });
-
-    var _orderline_super = models.Orderline.prototype;
-    models.Orderline = models.Orderline.extend({
-        compute_lot_lines: function(){
-            var done = new $.Deferred();
-            var compute_lot_lines = _orderline_super.compute_lot_lines.apply(this, arguments);
-            this.pos.get_lot(this.product.id, this.pos.config.stock_location_id[0])
-                .then(function (product_lot) {
-                    var lot_name = Object.keys(product_lot);
-                    for (var i = 0; i < lot_name.length; i++) {
-                        if (product_lot[lot_name[i]] < compute_lot_lines.order_line.quantity) {
-                            lot_name.splice(i, 1);
-                        }
-                    }
-                    compute_lot_lines.lot_name = lot_name;
-                    done.resolve(compute_lot_lines);
+        async _addLots(ids, setAvailable = true) {
+            if (setAvailable) {
+                await this.rpc({
+                    model: "stock.production.lot",
+                    method: "write",
+                    args: [ids, {available_in_pos: true}],
+                    context: this.session.user_context,
                 });
-            return compute_lot_lines;
+            }
+            const lot_model = _.find(
+                this.models,
+                (model) => model.model === "stock.production.lot"
+            );
+            const lot = await this.rpc({
+                model: "stock.production.lot",
+                method: "read",
+                args: [ids, lot_model.fields],
+                context: {...this.session.user_context},
+            });
+            lot_model.loaded(this, lot);
+        },
+        async loadLimitedLots() {
+            const lot_model = _.find(
+                this.models,
+                (model) => model.model === "stock.production.lot"
+            );
+            const loaded_product_ids = this.getLoadedProductIds();
+            const lots = await this.rpc({
+                model: "pos.config",
+                method: "get_lots_loading",
+                args: [this.config_id, loaded_product_ids, lot_model.fields],
+                context: {...this.session.user_context},
+            });
+            lot_model.loaded(this, lots);
+            return lots.length;
+        },
+        async loadLotsBackground() {
+            let page = 0;
+            const lot_model = _.find(
+                this.models,
+                (model) => model.model === "stock.production.lot"
+            );
+            let lots = [];
+            do {
+                lots = await this.rpc(
+                    {
+                        model: "stock.production.lot",
+                        method: "search_read",
+                        kwargs: {
+                            domain: lot_model.domain(this),
+                            fields: lot_model.fields,
+                            offset: page * this.env.pos.config.limited_lots_amount,
+                            limit: this.env.pos.config.limited_lots_amount,
+                        },
+                        context: {...this.session.user_context},
+                    },
+                    {shadow: true}
+                );
+                lot_model.loaded(this, lots);
+                page += 1;
+            } while (lots.length === this.config.limited_lots_amount);
+        },
+        getLoadedProductIds() {
+            // Return Object.keys(this.db.product_by_id);
+            // Or keep ids from tracked products only?
+            return _.map(
+                _.filter(this.db.product_by_id, (prod) => prod.tracking !== "none"),
+                (prod) => prod.id
+            );
         },
     });
-
 });
