@@ -1,24 +1,24 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <!-- Copyright 2018 Tecnativa - David Vidal
      License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl). -->
+<templates id="template" xml:space="preserve">
 
-<templates>
+        <!-- <t t-inherit="pos_event_sale.EventRegistrationReceipt" t-inherit-mode="extension"> -->
+        <!-- <t t-jquery="div.modal-dialog" t-operation="replace"> -->
+    <t t-inherit="point_of_sale.EditListPopup" t-inherit-mode="extension">
 
-    <t t-extend="PackLotLinePopupWidget">
-        <t t-jquery=".title" t-operation="append">
-            <div class="packlot-select">
-                <t t-if="widget.options.pack_lot_lines and widget.options.pack_lot_lines.lot_name">
-                    <select class="packlot-line-select">
-                        <option disabled="" selected="" value="">Select a Serial/Lot Number</option>
-                        <t t-foreach="widget.options.pack_lot_lines.lot_name" t-as="lot_name">
-                            <option t-att-value="lot_name">
-                                <t t-esc="lot_name"/>
-                            </option>
-                        </t>
-                    </select>
-                </t>
-            </div>
-        </t>
+        <xpath expr="//div[hasclass('modal-dialog')]" position="inside">
+        <span> HERE</span>
+             <footer class="footer">
+                    <div class="button confirm" t-on-click="confirm">
+                        NOOk
+                    </div>
+                    <div class="button cancel" t-on-click="cancel">
+                        Cancel
+                    </div>
+                </footer>
+        </xpath>
+
     </t>
 
 </templates>
