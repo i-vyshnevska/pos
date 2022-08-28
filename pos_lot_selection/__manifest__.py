@@ -12,15 +12,11 @@
     "depends": [
         "pos_lot_base",
     ],
-    "data": [
-        # 'templates/assets.xml',
-    ],
-    "qweb": [
-        # 'static/src/xml/pos.xml'
-    ],
     "assets": {
-        "web.assets_qweb": ['pos_lot_selection/static/src/xml/pos.xml'],
-        
+        "web.assets_qweb": ['pos_lot_selection/static/src/**/*'],
+        "point_of_sale.assets": [
+            "pos_lot_selection/static/src/js/**/*.js",
+        ],
     },
     "application": False,
     "installable": True,
