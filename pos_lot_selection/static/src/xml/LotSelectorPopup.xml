@@ -8,19 +8,24 @@
 
         <t t-name="LotSelectorPopup" owl="1" >
             <div role="dialog" class="modal-dialog">
-                <div class="popup">
+                <div class="popup popup-text">
                     <header class="title ">
                         <t t-esc="props.title"/>
                     </header>
                     <main class="body">
-                        <select id="lot_select" class="popup-input">
-                            <option value="">Select Lot ID</option>
-                            <t t-debug="pdb"></t>
-                            <t t-foreach="lots" t-as="lot" >
-                                <!-- <t t-set="display_name" t-value="props.lot_data[lot].name"/> -->
-                                <span> some</span>
-                            </t>
-                        </select>
+
+
+                        <t t-foreach="slected_items" t-as="item" t-key="item_index" id="lot_select">
+                            <select class="popup-input">
+                                <!-- <option value="">Select Lot ID</option> -->
+                                    <!-- <t t-debug="pdb"></t> -->
+                                <option t-foreach="lots" t-as="lot" t-key="lot_index" t-att-value="lot.name" >
+                                    <t t-esc="lot.name"/> 
+                                </option>
+                            </select>
+                        </t>
+
+
                     </main>
                     <footer class="footer">
                         <div class="button confirm" t-on-click="confirm">

@@ -8,33 +8,41 @@ odoo.define("pos_lot_selection.ProductScreen", function (require) {
 
     const ProductScreen = require("point_of_sale.ProductScreen");
     const Registries = require("point_of_sale.Registries");
+    const NumberBuffer = require('point_of_sale.NumberBuffer');
 
     const PosLotSaleProductScreen = (ProductScreen) =>
         class extends ProductScreen {
             async _clickProduct(event) {
                 const product = event.detail;
+                let draftPackLotLines;
                 if (
                     product.tracking !== "none"
                 ) {
-                    return this.showPopup("LotSelectorPopup", {product});
+                    const {confirmed, payload } = await this.showPopup("LotSelectorPopup", {product});
+                    // Do not add product if options is undefined.
+                    if (!confirmed) return;
+                    // Add the product after having the extra information.
+                    // debugger;
+
+                    const modifiedPackLotLines = Object.fromEntries(
+                        payload.newArray.filter(item => item.id).map(item => [item.id, item.text])
+                    );
+                    const newPackLotLines = payload.newArray
+                        .filter(item => !item.id)
+                        .map(item => ({ lot_name: item.text }));
+
+                    draftPackLotLines = { modifiedPackLotLines, newPackLotLines };
+                    
+                    this.currentOrder.add_product(product, {draftPackLotLines});
+
+
+                    NumberBuffer.reset();
+                    return;
                 }
                 return super._clickProduct(event);
             }
-            // _onClickPay() {
-            //     // Update and check order events availability before
-            //     // going to the payment screen. Prevent paying if error.
-            //     if (this.currentOrder) {
-            //         this.currentOrder
-            //             .updateAndCheckEventAvailability()
-            //             .then(() => super._onClickPay(...arguments))
-            //             .catch((error) => {
-            //                 this.showPopup("ErrorPopup", {
-            //                     title: this.env._t("Lot availability error"),
-            //                     body: error.message || String(error),
-            //                 });
-            //             });
-            //     }
-            // }
+
+            
         };
 
     Registries.Component.extend(ProductScreen, PosLotSaleProductScreen);
