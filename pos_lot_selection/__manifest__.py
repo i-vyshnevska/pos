@@ -10,7 +10,7 @@
     "website": "https://github.com/OCA/pos",
     "license": "AGPL-3",
     "depends": [
-        "pos_lot_base",
+        "pos",
     ],
     "assets": {
         "web.assets_qweb": ['pos_lot_selection/static/src/**/*'],
