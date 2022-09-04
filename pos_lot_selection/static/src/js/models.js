@@ -15,7 +15,6 @@ odoo.define("pos_lot_base.models", function (require) {
                 return !self.config.limited_lots_loading;
             },
             domain: function (self) {
-                // debugger;
                 return [
                     // "&",
                     "&",

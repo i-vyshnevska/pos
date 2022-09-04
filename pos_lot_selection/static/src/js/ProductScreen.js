@@ -1,6 +1,5 @@
 /*
     Copyright 2022 Camptocamp SA (https://www.camptocamp.com).
-    @author Iván Todorovich <ivan.todorovich@camptocamp.com>
     License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 */
 odoo.define("pos_lot_selection.ProductScreen", function (require) {
@@ -23,7 +22,6 @@ odoo.define("pos_lot_selection.ProductScreen", function (require) {
                     // Do not add product if options is undefined.
                     if (!confirmed) return;
                     // Add the product after having the extra information.
-                    // debugger;
 
                     const modifiedPackLotLines = Object.fromEntries(
                         payload.newArray

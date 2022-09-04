@@ -3,8 +3,6 @@
      License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl). -->
 <templates id="template" xml:space="preserve">
 
-        <!-- <t t-inherit="pos_event_sale.EventRegistrationReceipt" t-inherit-mode="extension"> -->
-
         <t t-name="LotSelectorPopup" owl="1">
             <div role="dialog" class="modal-dialog">
                 <div class="popup popup-text">
@@ -12,16 +10,8 @@
                         <t t-esc="props.title" />
                     </header>
                     <main class="body">
-                        <!-- <t t-foreach="slected_items" t-as="item" t-key="item_index" id="lot_select">
-                            <select class="popup-input">
-                                <option t-foreach="lots" t-as="lot" t-key="lot_index" selected="item.text == '5'" t-att-value="lot.name" >
-                                    <t t-esc="lot.name"/>
-                                </option>
-                            </select>
-                        </t> -->
-                        <!--  TODO dynamically add new lines if option selected -->
-                        <select class="popup-input" id="new_select">
-                            <option value="">Select Lot ID</option>
+                    <input type="text" class="popup-input list-line-input" id="new_select" list="prepared_lots" placeholder="Serial/Lot Number" />
+                        <datalist id="prepared_lots">
                             <option
                             t-foreach="lots"
                             t-as="lot"
@@ -30,7 +20,7 @@
                         >
                                 <t t-esc="lot.name" />
                             </option>
-                        </select>
+                        </datalist>
                     </main>
                     <footer class="footer">
                         <div class="button confirm" t-on-click="confirm">
