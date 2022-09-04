@@ -5,26 +5,30 @@
 
         <!-- <t t-inherit="pos_event_sale.EventRegistrationReceipt" t-inherit-mode="extension"> -->
 
-        <t t-name="LotSelectorPopup" owl="1" >
+        <t t-name="LotSelectorPopup" owl="1">
             <div role="dialog" class="modal-dialog">
                 <div class="popup popup-text">
                     <header class="title ">
-                        <t t-esc="props.title"/>
+                        <t t-esc="props.title" />
                     </header>
                     <main class="body">
-                        <t t-foreach="slected_items" t-as="item" t-key="item_index" id="lot_select">
+                        <!-- <t t-foreach="slected_items" t-as="item" t-key="item_index" id="lot_select">
                             <select class="popup-input">
-                                <t t-debug="pdb"></t>
                                 <option t-foreach="lots" t-as="lot" t-key="lot_index" selected="item.text == '5'" t-att-value="lot.name" >
-                                    <t t-esc="lot.name"/> 
+                                    <t t-esc="lot.name"/>
                                 </option>
                             </select>
-                        </t>
+                        </t> -->
                         <!--  TODO dynamically add new lines if option selected -->
                         <select class="popup-input" id="new_select">
                             <option value="">Select Lot ID</option>
-                            <option t-foreach="lots" t-as="lot" t-key="lot_index" t-att-value="lot.name" >
-                                <t t-esc="lot.name"/> 
+                            <option
+                            t-foreach="lots"
+                            t-as="lot"
+                            t-key="lot_index"
+                            t-att-value="lot.name"
+                        >
+                                <t t-esc="lot.name" />
                             </option>
                         </select>
                     </main>
