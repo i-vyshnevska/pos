@@ -10,7 +10,13 @@
                         <t t-esc="props.title" />
                     </header>
                     <main class="body">
-                    <input type="text" class="popup-input list-line-input" id="new_select" list="prepared_lots" placeholder="Serial/Lot Number" />
+                    <input
+                        type="text"
+                        class="popup-input list-line-input"
+                        id="new_select"
+                        list="prepared_lots"
+                        placeholder="Serial/Lot Number"
+                    />
                         <datalist id="prepared_lots">
                             <option
                             t-foreach="lots"

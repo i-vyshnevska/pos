@@ -16,16 +16,16 @@ odoo.define("pos_lot_base.db", function (require) {
             if (!lots instanceof Array) {
                 lots = [lots];
             }
-            // we don't constrain lot selection to already sold products
+            // We don't constrain lot selection to already sold products
             // as pos terminal doing inventory records only on session closing
             for (const lot of lots) {
-                var product_id = lot["product_id"][0];
+                var product_id = lot.product_id[0];
                 if (this.lot_by_product_id[product_id]) {
                     this.lot_by_product_id[product_id].push(lot);
                 } else {
                     this.lot_by_product_id[product_id] = [lot];
-                    }
                 }
+            }
         },
     });
     return PosDB;
