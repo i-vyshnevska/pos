@@ -14,7 +14,7 @@ odoo.define("pos_lot_selection.orderline", function (require) {
             _super_orderline.initialize.apply(this, arguments);
         },
 
-        can_be_merged_with: function (orderline) {
+        can_be_merged_with: function () {
             // Do not merge serial products same as lots
             if (
                 this.product.tracking === "serial" &&

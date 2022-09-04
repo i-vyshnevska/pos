@@ -13,7 +13,6 @@ odoo.define("pos_lot_selection.ProductScreen", function (require) {
         class extends ProductScreen {
             async _clickProduct(event) {
                 const product = event.detail;
-                let draftPackLotLines;
                 if (product.tracking !== "none") {
                     const {confirmed, payload} = await this.showPopup(
                         "LotSelectorPopup",
@@ -32,7 +31,7 @@ odoo.define("pos_lot_selection.ProductScreen", function (require) {
                         .filter((item) => !item.id)
                         .map((item) => ({lot_name: item.text}));
 
-                    draftPackLotLines = {modifiedPackLotLines, newPackLotLines};
+                    const draftPackLotLines = {modifiedPackLotLines, newPackLotLines};
 
                     this.currentOrder.add_product(product, {draftPackLotLines});
                     NumberBuffer.reset();
