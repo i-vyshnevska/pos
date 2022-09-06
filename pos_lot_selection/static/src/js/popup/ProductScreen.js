@@ -11,12 +11,15 @@ odoo.define("pos_lot_selection.ProductScreen", function (require) {
 
     const PosLotSaleProductScreen = (ProductScreen) =>
         class extends ProductScreen {
-            async _clickProduct(event) {
-                const product = event.detail;
+            async _getAddProductOptions(product, base_code) {
+
                 if (product.tracking !== "none") {
                     const {confirmed, payload} = await this.showPopup(
-                        "LotSelectorPopup",
-                        {product}
+                        "EditListPopup",
+                        {
+                            title: this.env._t('Lot/Serial Number(s) Required'),
+                            product
+                        }
                     );
                     // Do not add product if options is undefined.
                     if (!confirmed) return;
@@ -33,11 +36,13 @@ odoo.define("pos_lot_selection.ProductScreen", function (require) {
 
                     const draftPackLotLines = {modifiedPackLotLines, newPackLotLines};
 
-                    this.currentOrder.add_product(product, {draftPackLotLines});
+                    this.currentOrder.add_product(product, {
+                        draftPackLotLines,
+                    });
                     NumberBuffer.reset();
                     return;
                 }
-                return super._clickProduct(event);
+                return super._getAddProductOptions(product);
             }
         };
 

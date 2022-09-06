@@ -8,12 +8,13 @@ odoo.define("pos_lot_selection.LotSelectorPopup", function (require) {
     const AbstractAwaitablePopup = require("point_of_sale.AbstractAwaitablePopup");
     const Registries = require("point_of_sale.Registries");
     const {_lt} = require("@web/core/l10n/translation");
+    const EditListPopup = require("point_of_sale.EditListPopup");
 
-    class LotSelectorPopup extends AbstractAwaitablePopup {
+    const LotSelectorPopup = (EditListPopup) =>
+        class extends EditListPopup {
         constructor() {
             super(...arguments);
             // If there's a product, get lots available related to this product
-            this.slected_items = [];
             if (this.props.product) {
                 this.lots = this.env.pos.db.lot_by_product_id[this.props.product.id];
             }
@@ -23,13 +24,8 @@ odoo.define("pos_lot_selection.LotSelectorPopup", function (require) {
                 newArray: [Object.assign({}, {text: $("#new_select").val()})],
             };
         }
-    }
-    LotSelectorPopup.template = "LotSelectorPopup";
-    LotSelectorPopup.defaultProps = {
-        title: _lt("Lot/Serial"),
-        body: "",
-        array: [],
     };
-    Registries.Component.add(LotSelectorPopup);
-    return LotSelectorPopup;
+    
+    Registries.Component.extend(EditListPopup, LotSelectorPopup );
+    return EditListPopup;
 });
