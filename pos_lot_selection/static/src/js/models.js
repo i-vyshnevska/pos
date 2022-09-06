@@ -16,10 +16,10 @@ odoo.define("pos_lot_base.models", function (require) {
             },
             domain: function (self) {
                 return [
-                    // "&",
+                    "&",
                     "&",
                     ["product_id", "in", self.getLoadedProductIds()],
-                    // ["quant_ids.location_id", "=", self.config.warehouse_id[0]],
+                    ["available_on_pos", "=", true],
                     "|",
                     ["company_id", "=", self.config.company_id[0]],
                     ["company_id", "=", false],
@@ -44,42 +44,6 @@ odoo.define("pos_lot_base.models", function (require) {
             // Postpone lot loading according to pos config
             this.loadLotsBackground();
             return res;
-        },
-        async _addLots(ids, setAvailable = true) {
-            if (setAvailable) {
-                await this.rpc({
-                    model: "stock.production.lot",
-                    method: "write",
-                    args: [ids, {available_in_pos: true}],
-                    context: this.session.user_context,
-                });
-            }
-            const lot_model = _.find(
-                this.models,
-                (model) => model.model === "stock.production.lot"
-            );
-            const lot = await this.rpc({
-                model: "stock.production.lot",
-                method: "read",
-                args: [ids, lot_model.fields],
-                context: {...this.session.user_context},
-            });
-            lot_model.loaded(this, lot);
-        },
-        async loadLimitedLots() {
-            const lot_model = _.find(
-                this.models,
-                (model) => model.model === "stock.production.lot"
-            );
-            const loaded_product_ids = this.getLoadedProductIds();
-            const lots = await this.rpc({
-                model: "pos.config",
-                method: "get_lots_loading",
-                args: [this.config_id, loaded_product_ids, lot_model.fields],
-                context: {...this.session.user_context},
-            });
-            lot_model.loaded(this, lots);
-            return lots.length;
         },
         async loadLotsBackground() {
             let page = 0;
