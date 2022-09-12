@@ -16,7 +16,7 @@
                 />
                     <datalist id="prepared_lots">
                         <option
-                        t-foreach="lots"
+                        t-foreach="props.lots"
                         t-as="lot"
                         t-key="lot_index"
                         t-att-value="lot.name"

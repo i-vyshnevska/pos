@@ -12,15 +12,33 @@ odoo.define("pos_lot_selection.ProductScreen", function (require) {
     const PosLotSaleProductScreen = (ProductScreen) =>
         class extends ProductScreen {
             async _getAddProductOptions(product, base_code) {
-
                 if (product.tracking !== "none") {
-                    const {confirmed, payload} = await this.showPopup(
-                        "EditListPopup",
+                    const lots = await this.rpc(
                         {
-                            title: this.env._t('Lot/Serial Number(s) Required'),
-                            product
-                        }
+                            model: "stock.production.lot",
+                            method: "search_read",
+                            kwargs: {
+                                domain: [
+                                    "&",
+                                    "&",
+                                    ["product_id", "=", product.id],
+                                    ["available_on_pos", "=", true],
+                                    "|",
+                                    ["company_id", "=", this.env.session.company_id],
+                                    ["company_id", "=", false],
+                                ],
+                                fields: ["name", "product_id", "product_qty"],
+                            },
+                            context: {...this.env.session.user_context},
+                        },
+                        {shadow: true}
                     );
+
+                    const {confirmed, payload} = await this.showPopup("EditListPopup", {
+                        title: this.env._t("Lot/Serial Number(s) Required"),
+                        lots: lots,
+                    });
+
                     // Do not add product if options is undefined.
                     if (!confirmed) return;
                     // Add the product after having the extra information.
@@ -34,7 +52,10 @@ odoo.define("pos_lot_selection.ProductScreen", function (require) {
                         .filter((item) => !item.id)
                         .map((item) => ({lot_name: item.text}));
 
-                    const draftPackLotLines = {modifiedPackLotLines, newPackLotLines};
+                    const draftPackLotLines = {
+                        modifiedPackLotLines,
+                        newPackLotLines,
+                    };
 
                     this.currentOrder.add_product(product, {
                         draftPackLotLines,
