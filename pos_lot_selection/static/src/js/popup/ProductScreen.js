@@ -11,9 +11,9 @@ odoo.define("pos_lot_selection.ProductScreen", function (require) {
 
     const PosLotSaleProductScreen = (ProductScreen) =>
         class extends ProductScreen {
-            async _getAddProductOptions(product, base_code) {
+            async _getAddProductOptions(product) {
                 if (product.tracking !== "none") {
-                    const lots = await this.rpc(
+                    var lots = await this.rpc(
                         {
                             model: "stock.production.lot",
                             method: "search_read",
@@ -32,7 +32,10 @@ odoo.define("pos_lot_selection.ProductScreen", function (require) {
                             context: {...this.env.session.user_context},
                         },
                         {shadow: true}
-                    );
+                    ).catch(() => Promise.resolve([false]));
+                    if (!lots) {
+                        lots = [];
+                    }
 
                     const {confirmed, payload} = await this.showPopup("EditListPopup", {
                         title: this.env._t("Lot/Serial Number(s) Required"),
