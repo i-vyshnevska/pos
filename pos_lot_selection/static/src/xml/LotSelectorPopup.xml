@@ -5,26 +5,33 @@
 
     <t t-inherit="point_of_sale.EditListPopup" t-inherit-mode="extension">
 
-        <xpath expr="//main[hasclass('list-lines')]" position="replace">
-            <main class="body">
-                <input
-                    type="text"
-                    class="popup-input list-line-input"
-                    id="new_select"
-                    list="prepared_lots"
-                    placeholder="Serial/Lot Number"
-                />
-                    <datalist id="prepared_lots">
-                        <option
+        <xpath expr="//t[@t-foreach='state.array']" position="replace">
+            <t t-foreach="state.array" t-as="item" t-key="item._id">
+                <EditListInput item="item" lots="props.lots" />
+            </t>
+        </xpath>
+    </t>
+
+
+    <t t-inherit="point_of_sale.EditListInput" t-inherit-mode="extension">
+
+        <xpath expr="//input" position="attributes">
+            <attribute name="list">prepared_lots</attribute>
+        </xpath>
+
+        <xpath expr="//input" position="after">
+            <datalist id="prepared_lots">
+                <t t-if="props.lots">
+                    <option
                         t-foreach="props.lots"
                         t-as="lot"
                         t-key="lot_index"
-                        t-att-value="lot.name"
+                        t-att-value="lot"
                     >
-                            <t t-esc="lot.name" />
-                        </option>
-                    </datalist>
-                </main>
+                        <t t-esc="lot" />
+                    </option>
+                </t>
+            </datalist>
         </xpath>
     </t>
 

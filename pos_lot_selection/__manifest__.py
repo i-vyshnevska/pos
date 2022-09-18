@@ -13,7 +13,7 @@
         "point_of_sale",
     ],
     "assets": {
-        "web.assets_qweb": ["pos_lot_selection/static/src/**/*"],
+        "web.assets_qweb": ["pos_lot_selection/static/src/xml/**/*.xml"],
         "point_of_sale.assets": [
             "pos_lot_selection/static/src/js/**/*.js",
         ],

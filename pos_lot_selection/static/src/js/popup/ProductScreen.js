@@ -7,66 +7,16 @@ odoo.define("pos_lot_selection.ProductScreen", function (require) {
 
     const ProductScreen = require("point_of_sale.ProductScreen");
     const Registries = require("point_of_sale.Registries");
-    const NumberBuffer = require("point_of_sale.NumberBuffer");
 
     const PosLotSaleProductScreen = (ProductScreen) =>
         class extends ProductScreen {
-            async _getAddProductOptions(product) {
-                if (product.tracking !== "none") {
-                    var lots = await this.rpc(
-                        {
-                            model: "stock.production.lot",
-                            method: "search_read",
-                            kwargs: {
-                                domain: [
-                                    "&",
-                                    "&",
-                                    ["product_id", "=", product.id],
-                                    ["available_on_pos", "=", true],
-                                    "|",
-                                    ["company_id", "=", this.env.session.company_id],
-                                    ["company_id", "=", false],
-                                ],
-                                fields: ["name", "product_id", "product_qty"],
-                            },
-                            context: {...this.env.session.user_context},
-                        },
-                        {shadow: true}
-                    ).catch(() => Promise.resolve([false]));
-                    if (!lots) {
-                        lots = [];
-                    }
-
-                    const {confirmed, payload} = await this.showPopup("EditListPopup", {
-                        title: this.env._t("Lot/Serial Number(s) Required"),
-                        lots: lots,
-                    });
-
-                    // Do not add product if options is undefined.
-                    if (!confirmed) return;
-                    // Add the product after having the extra information.
-
-                    const modifiedPackLotLines = Object.fromEntries(
-                        payload.newArray
-                            .filter((item) => item.id)
-                            .map((item) => [item.id, item.text])
-                    );
-                    const newPackLotLines = payload.newArray
-                        .filter((item) => !item.id)
-                        .map((item) => ({lot_name: item.text}));
-
-                    const draftPackLotLines = {
-                        modifiedPackLotLines,
-                        newPackLotLines,
-                    };
-
-                    this.currentOrder.add_product(product, {
-                        draftPackLotLines,
-                    });
-                    NumberBuffer.reset();
-                    return;
+            async _getAddProductOptions(product, base_code) {
+                if (["serial", "lot"].includes(product.tracking)) {
+                    // Set lots to context as it one possible way to extract arguments
+                    // later in popup
+                    this.env.session.lots = await this.env.pos.get_lots(product);
                 }
-                return super._getAddProductOptions(product);
+                return super._getAddProductOptions(product, (base_code = base_code));
             }
         };
 
