@@ -12,7 +12,9 @@ odoo.define("pos_lot_barcode.EditListPopup", function (require) {
         class extends EditListPopup {
             constructor() {
                 super(...arguments);
-                this.props.lots = this.env.session.lots;
+                if (this.props.title === this.env._t("Lot/Serial Number(s) Required")) {
+                    this.props.lots = this.env.session.lots;
+                }
             }
         };
     Registries.Component.extend(EditListPopup, LotSelectEditListPopup);
