@@ -16,9 +16,7 @@ odoo.define("pos_lot_selection.ProductScreen", function (require) {
                     // later in popup
                     this.env.session.lots = await this.env.pos.get_lots(product);
                 }
-                res = super._getAddProductOptions(product, (base_code = base_code));
-                this.env.session.lots = []
-                return res
+                return super._getAddProductOptions(product, (base_code = base_code));
             }
         };
 
